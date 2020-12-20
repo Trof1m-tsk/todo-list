@@ -14,8 +14,10 @@ function deleteTask (evt) {
     evt.preventDefault();
 
     const todo = evt.target.closest(".todo");
+    const parent = todo.parentNode;
+    const index = [...parent.children].indexOf(todo);
 
-    deleteTodoFromStorage(todo);
+    deleteTodoFromStorage(todo, index);
     todo.classList.add("falling");
     todo.addEventListener("transitionend", function() {
         todo.remove();
@@ -24,7 +26,13 @@ function deleteTask (evt) {
 
 function completeTask (evt) {
     evt.preventDefault();
-    evt.target.closest(".todo").classList.toggle("completed");
+
+    const todo = evt.target.closest(".todo");
+    const parent = todo.parentNode;
+    const index = [...parent.children].indexOf(todo);
+
+    todo.classList.toggle("completed");
+    updateTodoStorage(todo, index);
 }
 
 function filterTodo(evt) {
@@ -54,7 +62,7 @@ function filterTodo(evt) {
 }
 
 function saveTodosLocally(todo) {
-    savedTodosLocally.push(todo);
+    savedTodosLocally.push({"value" : todo});
     localStorage.setItem("savedTodosLocally", JSON.stringify(savedTodosLocally));
 }
 
@@ -69,7 +77,11 @@ function renderTodo(newTodo) {
     todoDiv.classList.add("todo");
     const todoItem = document.createElement("li");
     todoItem.classList.add("todo-item");
-    todoItem.textContent = newTodo;
+    todoItem.textContent = newTodo.value;
+
+    if (newTodo.status) {
+        todoDiv.classList.add("completed");
+    }
     const completeButton = document.createElement("button");
     completeButton.innerHTML = "<i class=\"fas fa-check\"></i>";
     completeButton.classList.add("complete-btn");
@@ -89,18 +101,31 @@ function renderTodo(newTodo) {
 }
 
 function addTodo (evt) {
-    const todoValue = todoInput.value;
+    const todo = todoInput;
 
     evt.preventDefault();
-    if (!todoValue) return;
+    if (!todo) return;
 
-    renderTodo(todoValue);
-    saveTodosLocally(todoValue);
+    renderTodo(todo);
+    saveTodosLocally(todo.value);
     todoInput.value = "";
 }
 
-function deleteTodoFromStorage(todo) {
+function deleteTodoFromStorage(todo, index) {
     const todoIndex = todo.querySelector(".todo-item").textContent;
-    savedTodosLocally.splice(savedTodosLocally.indexOf(todoIndex), 1);
+    savedTodosLocally.splice(index, 1);
     localStorage.setItem("savedTodosLocally", JSON.stringify(savedTodosLocally));
+}
+
+function updateTodoStorage(todo, index) {
+    if (todo.classList.contains("completed")) {
+        savedTodosLocally[index].status = "completed";
+        console.log("completed", savedTodosLocally);
+    } else {
+        savedTodosLocally[index].status = "";
+        console.log("not completed", savedTodosLocally);
+    }
+
+    localStorage.setItem("savedTodosLocally", JSON.stringify(savedTodosLocally));
+
 }
