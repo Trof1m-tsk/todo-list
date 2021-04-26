@@ -77,7 +77,7 @@ function renderTodo(newTodo) {
     todoDiv.classList.add("todo");
     const todoItem = document.createElement("li");
     todoItem.classList.add("todo-item");
-    todoItem.textContent = newTodo.value;
+    todoItem.textContent = newTodo;
 
     if (newTodo.status) {
         todoDiv.classList.add("completed");
@@ -101,13 +101,15 @@ function renderTodo(newTodo) {
 }
 
 function addTodo (evt) {
-    const todo = todoInput;
-
+    const todo = todoInput.value;
     evt.preventDefault();
-    if (!todo) return;
+
+    if (!todo) {
+        return
+    };
 
     renderTodo(todo);
-    saveTodosLocally(todo.value);
+    saveTodosLocally(todo);
     todoInput.value = "";
 }
 
